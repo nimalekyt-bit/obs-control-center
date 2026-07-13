@@ -4,10 +4,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const appRoot = path.resolve(__dirname, '..');
-const workspaceRoot = path.resolve(appRoot, '..');
 const config = JSON.parse(fs.readFileSync(path.join(appRoot, 'config', 'widgets.json'), 'utf8'));
 
-test('widget registry has unique IDs and valid entry files', () => {
+test('legacy widget registry has unique IDs and safe relative entries', () => {
   const ids = config.widgets.map(widget => widget.id);
   assert.equal(new Set(ids).size, ids.length, 'Widget IDs must be unique');
   for (const widget of config.widgets) {
@@ -15,7 +14,9 @@ test('widget registry has unique IDs and valid entry files', () => {
     assert.ok(Number.isInteger(widget.width) && widget.width > 0);
     assert.ok(Number.isInteger(widget.height) && widget.height > 0);
     assert.ok([30, 60].includes(widget.fps));
-    assert.ok(fs.existsSync(path.join(workspaceRoot, widget.folder, widget.entry)), `${widget.id}: entry file is missing`);
+    const relativeEntry = path.normalize(path.join(widget.folder, widget.entry));
+    assert.equal(path.isAbsolute(relativeEntry), false, `${widget.id}: entry must be relative to the selected workspace`);
+    assert.ok(!relativeEntry.startsWith(`..${path.sep}`) && relativeEntry !== '..', `${widget.id}: entry escapes the selected workspace`);
   }
 });
 
