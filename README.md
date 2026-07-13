@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/nimalekyt-bit/obs-control-center/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/nimalekyt-bit/obs-control-center?include_prereleases&style=flat-square&color=a8f34a"></a>
+  <a href="https://github.com/nimalekyt-bit/obs-control-center/releases/tag/v0.13.0"><img alt="GitHub release" src="https://img.shields.io/github/v/release/nimalekyt-bit/obs-control-center?include_prereleases&style=flat-square&color=a8f34a"></a>
   <a href="https://github.com/nimalekyt-bit/obs-control-center/actions"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/nimalekyt-bit/obs-control-center/ci.yml?style=flat-square"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-54d6ff?style=flat-square"></a>
   <img alt="Windows 10/11 x64" src="https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-7b8da9?style=flat-square">
