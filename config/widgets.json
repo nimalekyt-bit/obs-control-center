@@ -1,0 +1,24 @@
+{
+  "server": { "port": 3210 },
+  "profiles": {
+    "stream": ["music", "top-bar", "hotkey-tracker", "promo-banner", "developer-fuel", "todo-list"],
+    "development": ["music", "top-bar", "hotkey-tracker", "promo-banner", "developer-fuel", "todo-list", "ide-chat", "stream-ending", "showcase-audio-player"]
+  },
+  "widgets": [
+    { "id": "music", "name": "Музыка", "folder": "music", "entry": "index.html", "width": 1920, "height": 1080, "fps": 60, "category": "Музыка", "dependencies": ["music-scrobbler", "lyrics-service"], "health": [{ "type": "port", "port": 3001, "label": "Скробблер" }, { "type": "port", "port": 3003, "label": "Сервер текстов" }], "dataFile": "music/track.json" },
+    { "id": "top-bar", "name": "Верхняя панель", "folder": "top-bar", "entry": "index.html", "width": 1920, "height": 60, "fps": 30, "category": "Система", "dependencies": ["system-stats"], "health": [{ "type": "file", "path": "top-bar/stats.json", "maxAgeMs": 6000, "label": "Системная статистика" }] },
+    { "id": "hotkey-tracker", "name": "Горячие клавиши", "folder": "hotkey-tracker", "entry": "index.html", "width": 350, "height": 400, "fps": 60, "category": "Интерактив", "dependencies": ["hotkey-listener"], "health": [{ "type": "port", "port": 8765, "label": "Сервер горячих клавиш" }] },
+    { "id": "promo-banner", "name": "Промо-баннер", "folder": "promo-banner", "entry": "index.html", "width": 1920, "height": 1080, "fps": 60, "category": "Оформление" },
+    { "id": "developer-fuel", "name": "Developer Fuel", "folder": "developer-fuel", "entry": "index.html", "width": 300, "height": 120, "fps": 60, "category": "Интерактив" },
+    { "id": "todo-list", "name": "Список задач", "folder": "todo-list", "entry": "index.html", "width": 500, "height": 600, "fps": 30, "category": "Оформление" },
+    { "id": "ide-chat", "name": "IDE Chat", "folder": "ide-chat", "entry": "index.html", "width": 500, "height": 700, "fps": 30, "category": "Интерактив" },
+    { "id": "stream-ending", "name": "Завершение стрима", "folder": "stream-ending", "entry": "ending.html", "width": 1920, "height": 1080, "fps": 60, "category": "Сцены" },
+    { "id": "showcase-audio-player", "name": "Аудиоплеер", "folder": "showcase-audio-player", "entry": "index.html", "width": 1920, "height": 1080, "fps": 60, "category": "Сцены" }
+  ],
+  "services": [
+    { "id": "music-scrobbler", "name": "Музыкальный скробблер", "command": "music/ScrobblerApp/bin/Release/net8.0-windows10.0.19041.0/ScrobblerApp.exe", "health": [{ "type": "port", "port": 3001 }, { "type": "port", "port": 3002 }] },
+    { "id": "lyrics-service", "name": "Сервер текстов", "command": "node", "args": ["music/lyrics-server.js"], "health": [{ "type": "port", "port": 3003 }] },
+    { "id": "system-stats", "name": "Сборщик системной статистики", "command": "powershell.exe", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "top-bar/get_stats.ps1"], "health": [{ "type": "file", "path": "top-bar/stats.json", "maxAgeMs": 6000 }] },
+    { "id": "hotkey-listener", "name": "Обработчик горячих клавиш", "command": "python", "args": ["hotkey-tracker/key_listener.py"], "health": [{ "type": "port", "port": 8765 }] }
+  ]
+}

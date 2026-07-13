@@ -1,0 +1,19 @@
+name: Предложить улучшение
+description: Идея для интерфейса, виджетов или OBS-интеграции
+title: "[Идея]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Какую задачу нужно решить?
+      description: Опишите пользовательский сценарий, а не только желаемую кнопку.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Как должен выглядеть результат?
+    validations:
+      required: true
+

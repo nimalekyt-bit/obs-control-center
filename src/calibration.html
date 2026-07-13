@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>OBS A/V Sync Calibration</title>
+  <style>
+    * { box-sizing: border-box; } body { margin: 0; overflow: hidden; background: #05070c; color: #fff; font-family: Segoe UI, Arial, sans-serif; }
+    #marker { width: 100vw; height: 100vh; display: grid; place-items: center; background: #05070c; transition: background .025s linear; }
+    #marker.flash { background: #fff; color: #05070c; } .content { text-align: center; }
+    #timecode { font: 700 clamp(42px, 9vw, 170px)/1 Consolas, monospace; letter-spacing: -.07em; }
+    #label { margin-top: 16px; font-size: clamp(16px, 2vw, 30px); letter-spacing: .12em; color: #8da6c9; }
+    #panel { position: fixed; right: 22px; bottom: 22px; max-width: 340px; padding: 16px; border: 1px solid #31435e; border-radius: 12px; background: rgba(9,17,31,.9); font-size: 14px; line-height: 1.45; }
+    #panel strong { display: block; margin-bottom: 6px; } button { margin-top: 12px; border: 0; border-radius: 8px; padding: 10px 13px; background: #71e3ae; color: #06180f; font-weight: 800; cursor: pointer; } .running #panel { display: none; }
+  </style>
+</head>
+<body>
+  <main id="marker"><div class="content"><div id="timecode">00:00:00.000</div><div id="label">A/V SYNC CALIBRATION</div></div></main>
+  <aside id="panel"><strong>Тест синхронизации</strong>Нажмите «Начать», затем запишите 10 секунд в OBS. В записи белая вспышка и короткий звук должны совпасть.<button id="start">Начать тест</button></aside>
+  <script>
+    const marker = document.querySelector('#marker'), timecode = document.querySelector('#timecode'), start = document.querySelector('#start');
+    let running = false, audio, nextPulse = 0;
+    const pad = value => String(value).padStart(2, '0');
+    function format(ms) { return `${pad(Math.floor(ms / 3600000))}:${pad(Math.floor(ms / 60000) % 60)}:${pad(Math.floor(ms / 1000) % 60)}.${String(Math.floor(ms % 1000)).padStart(3, '0')}`; }
+    function pulse(now) { const osc = audio.createOscillator(), gain = audio.createGain(); osc.type = 'square'; osc.frequency.value = 1000; gain.gain.setValueAtTime(.18, audio.currentTime); gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + .07); osc.connect(gain).connect(audio.destination); osc.start(); osc.stop(audio.currentTime + .075); marker.classList.add('flash'); setTimeout(() => marker.classList.remove('flash'), 80); nextPulse = now + 2000; }
+    function tick(now) { timecode.textContent = format(performance.now()); if (running && now >= nextPulse) pulse(now); requestAnimationFrame(tick); }
+    start.addEventListener('click', async () => { audio = new (window.AudioContext || window.webkitAudioContext)(); await audio.resume(); running = true; document.body.classList.add('running'); nextPulse = performance.now() + 500; }); requestAnimationFrame(tick);
+  </script>
+</body>
+</html>

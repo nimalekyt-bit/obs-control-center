@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "product": "obs-control-center",
+  "name": "OBS Control Center",
+  "version": "0.13.0",
+  "channel": "early-access",
+  "docsVersion": "0.13",
+  "repository": "https://github.com/nimalekyt-bit/obs-control-center",
+  "release": {
+    "published": true,
+    "downloadUrl": "https://github.com/nimalekyt-bit/obs-control-center/releases/download/v0.13.0/OBS-Control-Center-Setup-0.13.0.exe",
+    "size": 94324003,
+    "sha256": "9d8ea52002a2de0093ff660bcd0f83b58d0a5fe5edab7bf9dfb10f7eedfab970",
+    "publishedAt": "2026-07-13T03:45:56.788Z",
+    "signature": "unsigned"
+  },
+  "compatibility": {
+    "platform": "Windows 10/11",
+    "architecture": "x64",
+    "status": "target-unvalidated",
+    "obsWebSocket": "v5",
+    "obsMinimumVersion": null,
+    "validatedAt": null
+  },
+  "limitations": [
+    "Версия 0.13.0 опубликована как Early Access и ещё не считается стабильным выпуском.",
+    "Windows-сборка не подписана Authenticode и может вызвать предупреждение SmartScreen.",
+    "Не завершены чистая установка и многопрофильная проверка с реальным OBS.",
+    "Политика поддержки старых версий и миграций ещё не утверждена владельцем."
+  ],
+  "docs": {
+    "firstRun": "/docs/first-run/",
+    "workspace": "/docs/workspace/",
+    "widgets": "/docs/widgets/",
+    "obs": "/docs/obs-connection/",
+    "scenes": "/docs/scenes/",
+    "telemetry": "/docs/telemetry/",
+    "avTest": "/docs/av-test/",
+    "backups": "/docs/backups/"
+  },
+  "updatedAt": "2026-07-13"
+}

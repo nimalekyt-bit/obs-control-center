@@ -1,0 +1,15 @@
+node_modules/
+release*/
+dist/
+*.exe
+*.log
+.env
+coverage/
+
+# Internal project context and planning are intentionally kept out of the
+# public repository. User-facing documentation lives on the product website.
+docs/
+AGENTS.md
+.codex/
+*audit*.md
+*roadmap*.md

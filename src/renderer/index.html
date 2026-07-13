@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-src http://127.0.0.1:*; connect-src http://127.0.0.1:* ws://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'self'" />
+    <title>OBS Control Center</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="readability.css" />
+    <link rel="stylesheet" href="workspace.css" />
+    <link rel="stylesheet" href="migration.css" />
+    <link rel="stylesheet" href="manager.css" />
+    <link rel="stylesheet" href="statistics.css" />
+    <link rel="stylesheet" href="obs-editor.css" />
+    <link rel="stylesheet" href="drag.css" />
+    <link rel="stylesheet" href="accessibility.css" />
+    <link rel="stylesheet" href="updates.css" />
+    <link rel="stylesheet" href="resilience.css" />
+  </head>
+  <body>
+    <main id="app">
+      <section class="boot-screen" role="status" aria-live="polite" aria-label="OBS Control Center запускается">
+        <div class="boot-orb boot-orb--one"></div><div class="boot-orb boot-orb--two"></div>
+        <article class="boot-card">
+          <div class="boot-brand"><img src="../../assets/icon.png" alt=""><div><strong>OBS Control Center</strong><span>Локальная рабочая среда</span></div></div>
+          <div class="boot-copy"><span>ЗАПУСК ПРИЛОЖЕНИЯ</span><h1>Подготавливаем всё<br>для вашего эфира</h1><p>Проверяем настройки, папку виджетов и локальные компоненты.</p></div>
+          <div class="boot-progress" aria-hidden="true"><i></i></div>
+          <div class="boot-status"><span><i></i>Без облака</span><span><i></i>Данные остаются у вас</span><b>Пожалуйста, подождите…</b></div>
+        </article>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,51 @@
+{
+  "name": "obs-control-center",
+  "version": "0.13.0",
+  "private": true,
+  "author": "Woodskilla",
+  "license": "MIT",
+  "description": "Локальный центр управления OBS-виджетами",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "dist": "electron-builder --win nsis",
+    "dist:portable": "electron-builder --win portable",
+    "release": "electron-builder --win nsis --publish always",
+    "test": "node --test test/*.test.js"
+  },
+  "build": {
+    "appId": "com.woodskilla.obs-control-center",
+    "productName": "OBS Control Center",
+    "files": [
+      "src/**/*",
+      "config/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "publish": [{ "provider": "github", "owner": "nimalekyt-bit", "repo": "obs-control-center" }],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "dependencies": {
+    "@fontsource-variable/manrope": "^5.2.8",
+    "adm-zip": "^0.5.18",
+    "electron-updater": "^6.8.9",
+    "obs-websocket-js": "^5.0.6"
+  },
+  "devDependencies": {
+    "electron": "^39.8.10",
+    "electron-builder": "^26.0.12"
+  }
+}

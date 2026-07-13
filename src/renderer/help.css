@@ -1,0 +1,24 @@
+.help-hero, .help-faq, .about-card {
+  max-width: 920px;
+  margin-top: 28px;
+  padding: 28px;
+  border: 1px solid #294664;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #11243a, #0d1727);
+}
+
+.help-hero h2, .about-card h2 { margin: 7px 0; font-size: 27px; }
+.help-hero > p:not(.eyebrow), .about-card > p { max-width: 720px; color: #afc0d1; line-height: 1.55; font-size: 13px; }
+.help-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 15px; }
+.help-steps article { padding: 20px; border: 1px solid #243a56; border-radius: 12px; background: #0e1a2b; }
+.help-steps h3 { margin: 13px 0 7px; }
+.help-steps p { min-height: 75px; color: #a7b8cb; font-size: 13px; line-height: 1.5; }
+.help-steps button { margin-top: 14px; }
+.help-faq h2 { margin-bottom: 13px; }
+.help-faq details { border-top: 1px solid #263c56; padding: 13px 0; }
+.help-faq summary { cursor: pointer; font-weight: 700; }
+.help-faq p { margin: 10px 0 0; color: #aabdd0; font-size: 13px; line-height: 1.5; }
+.about-card dl { margin: 22px 0 0; }
+.about-card dt { margin-top: 15px; color: #84a0c3; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.about-card dd { margin: 5px 0; color: #c5d5e5; font-size: 13px; }
+@media (max-width: 700px) { .help-steps { grid-template-columns: 1fr; } .help-steps p { min-height: auto; } }

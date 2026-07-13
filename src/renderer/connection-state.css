@@ -1,0 +1,38 @@
+.empty-connection {
+  max-width: 700px;
+  margin: 58px auto;
+  padding: 42px;
+  text-align: center;
+  border: 1px dashed #385979;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #101e31, #0c1727);
+}
+
+.empty-connection .empty-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 16px;
+  border-radius: 14px;
+  background: #173654;
+  color: #8dc2ff;
+  font-size: 25px;
+}
+
+.empty-connection h2 { margin: 8px 0; font-size: 24px; }
+
+.empty-connection p:not(.eyebrow) {
+  max-width: 520px;
+  margin: 0 auto 19px;
+  color: #a4b7cc;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.empty-connection small {
+  display: block;
+  margin-top: 15px;
+  color: #7e94ae;
+  font-size: 11px;
+}
