@@ -9,8 +9,8 @@
   "release": {
     "published": true,
     "downloadUrl": "https://github.com/nimalekyt-bit/obs-control-center/releases/download/v0.13.0/OBS-Control-Center-Setup-0.13.0.exe",
-    "size": 94324003,
-    "sha256": "9d8ea52002a2de0093ff660bcd0f83b58d0a5fe5edab7bf9dfb10f7eedfab970",
+    "size": 94324046,
+    "sha256": "bd1c771b4a5bcb93b621c1534be8c22f222f3281abf9efc1e99dc35a9a2b1a23",
     "publishedAt": "2026-07-13T03:45:56.788Z",
     "signature": "unsigned"
   },
