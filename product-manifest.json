@@ -8,11 +8,33 @@
   "repository": "https://github.com/nimalekyt-bit/obs-control-center",
   "release": {
     "published": true,
+    "tag": "v0.13.0",
+    "assetName": "OBS-Control-Center-Setup-0.13.0.exe",
+    "pageUrl": "https://github.com/nimalekyt-bit/obs-control-center/releases/tag/v0.13.0",
     "downloadUrl": "https://github.com/nimalekyt-bit/obs-control-center/releases/download/v0.13.0/OBS-Control-Center-Setup-0.13.0.exe",
     "size": 94324046,
     "sha256": "bd1c771b4a5bcb93b621c1534be8c22f222f3281abf9efc1e99dc35a9a2b1a23",
     "publishedAt": "2026-07-13T04:32:43Z",
-    "signature": "unsigned"
+    "signature": "unsigned",
+    "summary": "Безопасное восстановление сервисов",
+    "changes": [
+      {
+        "kind": "reliability",
+        "text": "Упавшие процессы перезапускаются через ограниченные интервалы 1, 3 и 10 секунд."
+      },
+      {
+        "kind": "safety",
+        "text": "После трёх падений за минуту restart-loop блокируется до ручного запуска."
+      },
+      {
+        "kind": "fixed",
+        "text": "Перезапуск отменяется при смене Workspace и закрытии приложения."
+      },
+      {
+        "kind": "new",
+        "text": "Интерфейс показывает попытку восстановления и состояние ручной проверки."
+      }
+    ]
   },
   "compatibility": {
     "platform": "Windows 10/11",

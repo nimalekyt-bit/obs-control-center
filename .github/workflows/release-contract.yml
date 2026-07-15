@@ -1,0 +1,43 @@
+name: Synchronize release contract
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-contract
+  cancel-in-progress: false
+
+jobs:
+  synchronize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify GitHub Release and update contract
+        run: npm run release:sync:write
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npm test
+      - name: Commit verified release metadata
+        shell: bash
+        run: |
+          if git diff --quiet -- product-manifest.json; then
+            echo "Release contract is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add product-manifest.json
+          git commit -m "Synchronize verified release contract"
+          git push origin HEAD:main

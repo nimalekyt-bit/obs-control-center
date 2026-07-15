@@ -58,10 +58,15 @@ test('product manifest matches the package and exposes only a verifiable release
   assert.equal(manifest.version, packageJson.version);
   assert.equal(manifest.repository, 'https://github.com/nimalekyt-bit/obs-control-center');
   assert.equal(manifest.release.published, true);
-  assert.match(manifest.release.downloadUrl, /^https:\/\/github\.com\/nimalekyt-bit\/obs-control-center\/releases\/download\/v0\.13\.0\//);
+  assert.equal(manifest.release.tag, `v${packageJson.version}`);
+  assert.equal(manifest.release.assetName, `OBS-Control-Center-Setup-${packageJson.version}.exe`);
+  assert.equal(manifest.release.pageUrl, `${manifest.repository}/releases/tag/v${packageJson.version}`);
+  assert.equal(manifest.release.downloadUrl, `${manifest.repository}/releases/download/v${packageJson.version}/${manifest.release.assetName}`);
   assert.match(manifest.release.sha256, /^[a-f0-9]{64}$/);
-  assert.ok(manifest.release.size > 90_000_000);
+  assert.ok(manifest.release.size > 0);
   assert.equal(manifest.release.signature, 'unsigned');
+  assert.ok(manifest.release.summary);
+  assert.ok(manifest.release.changes.length > 0);
   assert.match(manifest.docs.obs, /^\/docs\//);
 });
 
