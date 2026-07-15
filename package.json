@@ -5,6 +5,14 @@
   "author": "Woodskilla",
   "license": "MIT",
   "description": "Локальный центр управления OBS-виджетами",
+  "homepage": "https://obs-control-center.pages.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nimalekyt-bit/obs-control-center.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nimalekyt-bit/obs-control-center/issues"
+  },
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",

@@ -17,7 +17,7 @@
 
 > **Early Access:** публичная версия 0.13.0 предназначена для тестирования. Установщик не подписан Authenticode, поэтому Windows SmartScreen может показать предупреждение «Неизвестный издатель».
 
-[Скачать Early Access](https://github.com/nimalekyt-bit/obs-control-center/releases/tag/v0.13.0) · [Сообщить об ошибке](https://github.com/nimalekyt-bit/obs-control-center/issues)
+[Официальный сайт](https://obs-control-center.pages.dev) · [Скачать Early Access](https://github.com/nimalekyt-bit/obs-control-center/releases/tag/v0.13.0) · [Сообщить об ошибке](https://github.com/nimalekyt-bit/obs-control-center/issues)
 
 ## Быстрый старт
 
