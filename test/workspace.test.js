@@ -102,3 +102,25 @@ test('ZIP import rejects traversal and imports a valid widget archive', async t 
   assert.equal(result.widget.id, 'zip-widget');
   assert.ok(fs.existsSync(path.join(root, 'widgets', 'zip-widget', 'index.html')));
 });
+
+test('ZIP import rejects excessive file counts before extraction', async t => {
+  const root = await fsp.mkdtemp(path.join(os.tmpdir(), 'occ-zip-limit-'));
+  const archive = path.join(os.tmpdir(), `occ-widget-many-${Date.now()}.zip`);
+  t.after(() => Promise.all([fsp.rm(root, { recursive: true, force: true }), fsp.rm(archive, { force: true })]));
+  await createWorkspace(root);
+  const zip = new AdmZip();
+  for (let index = 0; index < 5001; index += 1) zip.addFile(`widget/file-${index}.txt`, Buffer.from('x'));
+  zip.writeZip(archive);
+  await assert.rejects(() => importWidgetZip(root, archive), /too many entries|слишком много/i);
+});
+
+test('folder import rejects a symlink root when the platform permits symlink creation', async t => {
+  const root = await fsp.mkdtemp(path.join(os.tmpdir(), 'occ-folder-link-'));
+  const source = await fsp.mkdtemp(path.join(os.tmpdir(), 'occ-folder-source-'));
+  const linked = path.join(root, 'linked-widget');
+  t.after(() => Promise.all([fsp.rm(root, { recursive: true, force: true }), fsp.rm(source, { recursive: true, force: true })]));
+  await fsp.writeFile(path.join(source, 'index.html'), '<p>test</p>');
+  try { await fsp.symlink(source, linked, 'junction'); } catch { t.skip('symlink creation is unavailable on this Windows account'); return; }
+  await createWorkspace(root);
+  await assert.rejects(() => importWidgetFolder(root, linked), /обычную папку|символические/i);
+});
