@@ -48,7 +48,7 @@ test('production UI has onboarding, help and safe diagnostic reporting', () => {
   assert.match(report, /\[Домашняя папка\]/);
   assert.match(report, /Перед отправкой: просмотрите текст/);
   assert.doesNotMatch(report, /snapshot\.workspace\.path/);
-  assert.equal(JSON.parse(read('package.json')).version, '0.13.2');
+  assert.equal(JSON.parse(read('package.json')).version, '0.13.3');
 });
 
 test('contextual documentation links use the dedicated safe IPC channel', () => {
@@ -124,6 +124,9 @@ test('OBS editor supports precise transforms, layers, duplication and undo for m
   assert.match(renderer, /data-scene-transform-form/);
   assert.match(renderer, /Обрезка источника/);
   assert.match(renderer, /function bindSceneDragging/);
+  assert.match(main, /payload\.action === 'scene-visibility'/);
+  assert.match(main, /entry\.type === 'scene-visibility'/);
+  assert.match(renderer, /data-obs-scene-action/);
 });
 
 test('first run supports an empty workspace or no workspace at all', () => {
@@ -138,6 +141,26 @@ test('first run supports an empty workspace or no workspace at all', () => {
   assert.match(renderer, /data-workspace-create/);
   assert.match(renderer, /data-workspace-skip/);
   assert.doesNotMatch(main, /candidate.*'music'.*widgets\.config\.json/);
+});
+
+test('widget library supports persistent favorites, sorting and safe bulk actions', () => {
+  const workspace = read('src/workspace.js');
+  const renderer = read('src/renderer/app.js');
+  assert.match(workspace, /favorite: Boolean\(widget\.favorite\)/);
+  assert.match(workspace, /favorite: changes\.favorite/);
+  assert.match(renderer, /data-widget-bulk/);
+  assert.match(renderer, /data-widget-sort/);
+  assert.match(renderer, /data-widget-select/);
+  assert.match(renderer, /window\.controlCenter\.updateWidget/);
+});
+
+test('diagnostic checks expose a timestamp and actionable reason', () => {
+  const main = read('src/main.js');
+  const renderer = read('src/renderer/app.js');
+  assert.match(main, /checkedAt/);
+  assert.match(main, /reason:/);
+  assert.match(renderer, /check\.reason/);
+  assert.match(renderer, /check\.checkedAt/);
 });
 
 test('workspace manager exposes safe widget lifecycle actions', () => {

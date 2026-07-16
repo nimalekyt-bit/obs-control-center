@@ -300,16 +300,21 @@ function checkPort(port) {
 }
 
 async function checkHealth(rule) {
-  if (rule.type === 'port') return { ...rule, ok: await checkPort(rule.port) };
+  const checkedAt = new Date().toISOString();
+  if (rule.type === 'port') {
+    const ok = await checkPort(rule.port);
+    return { ...rule, ok, checkedAt, reason: ok ? 'Порт отвечает' : `Порт ${rule.port} не отвечает` };
+  }
   if (rule.type === 'file') {
-    if (!workspaceRoot) return { ...rule, ok: false, ageMs: null };
+    if (!workspaceRoot) return { ...rule, ok: false, ageMs: null, checkedAt, reason: 'Рабочая папка не выбрана' };
     try {
       const stat = await fsp.stat(path.join(workspaceRoot, rule.path));
       const ageMs = Date.now() - stat.mtimeMs;
-      return { ...rule, ageMs, ok: ageMs <= rule.maxAgeMs };
-    } catch { return { ...rule, ok: false, ageMs: null }; }
+      const ok = ageMs <= rule.maxAgeMs;
+      return { ...rule, ageMs, ok, checkedAt, reason: ok ? 'Файл обновляется вовремя' : `Файл не обновлялся ${Math.round(ageMs / 60000)} мин.` };
+    } catch { return { ...rule, ok: false, ageMs: null, checkedAt, reason: `Файл не найден: ${rule.path}` }; }
   }
-  return { ...rule, ok: false };
+  return { ...rule, ok: false, checkedAt, reason: 'Тип проверки не поддерживается' };
 }
 
 async function widgetSnapshot(widget) {
@@ -569,6 +574,23 @@ async function obsWidgetAction(payload) {
     const result = await obsClient.call('CreateInput', { sceneName, inputName, inputKind: 'browser_source', inputSettings: { url: widgetObsUrl(widget), width: widget.width, height: widget.height, fps: widget.fps, reroute_audio: false, shutdown: false }, sceneItemEnabled: true });
     await obsClient.call('SetSceneItemTransform', { sceneName, sceneItemId: result.sceneItemId, sceneItemTransform: placementTransform(payload.preset || (widget.width >= 1500 ? 'fullscreen' : 'bottom-right'), widget, obsState.video) });
     addLog('info', 'OBS', `Виджет «${widget.name}» добавлен в сцену «${sceneName}».`);
+  } else if (payload.action === 'scene-visibility') {
+    const managed = scene.items.filter(item => item.managed);
+    if (!managed.length) throw new Error('В выбранной сцене нет источников OCC.');
+    const enabled = Boolean(payload.enabled);
+    obsUndoStack.push({ type: 'scene-visibility', sceneName, items: managed.map(item => ({ sceneItemId: item.id, enabled: item.enabled })) });
+    if (obsUndoStack.length > 30) obsUndoStack.shift();
+    for (const item of managed) await obsClient.call('SetSceneItemEnabled', { sceneName, sceneItemId: item.id, sceneItemEnabled: enabled });
+    addLog('info', 'OBS', `${enabled ? 'Показаны' : 'Скрыты'} все OCC-источники сцены «${sceneName}».`);
+  } else if (payload.action === 'undo-scene') {
+    const undoIndex = obsUndoStack.map(entry => entry.type === 'scene-visibility' && entry.sceneName === sceneName).lastIndexOf(true);
+    if (undoIndex < 0) throw new Error('Для этой сцены пока нет группового действия для отмены.');
+    const [undo] = obsUndoStack.splice(undoIndex, 1);
+    for (const previous of undo.items) {
+      const current = scene.items.find(item => item.id === previous.sceneItemId);
+      if (current?.managed) await obsClient.call('SetSceneItemEnabled', { sceneName, sceneItemId: previous.sceneItemId, sceneItemEnabled: previous.enabled });
+    }
+    addLog('info', 'OBS', `Групповая видимость OCC-источников сцены «${sceneName}» восстановлена.`);
   } else {
     const item = getManagedItem(sceneName, payload.sceneItemId);
     if (payload.action === 'toggle') {
