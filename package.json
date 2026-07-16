@@ -1,6 +1,6 @@
 {
   "name": "obs-control-center",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "private": true,
   "author": "Woodskilla",
   "license": "MIT",
@@ -36,7 +36,13 @@
     "directories": {
       "output": "release"
     },
-    "publish": [{ "provider": "github", "owner": "nimalekyt-bit", "repo": "obs-control-center" }],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "nimalekyt-bit",
+        "repo": "obs-control-center"
+      }
+    ],
     "win": {
       "target": "nsis",
       "icon": "assets/icon.ico"
