@@ -124,6 +124,9 @@ test('OBS editor supports precise transforms, layers, duplication and undo for m
   assert.match(renderer, /data-scene-transform-form/);
   assert.match(renderer, /Обрезка источника/);
   assert.match(renderer, /function bindSceneDragging/);
+  assert.match(main, /payload\.action === 'scene-visibility'/);
+  assert.match(main, /entry\.type === 'scene-visibility'/);
+  assert.match(renderer, /data-obs-scene-action/);
 });
 
 test('first run supports an empty workspace or no workspace at all', () => {
