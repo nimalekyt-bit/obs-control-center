@@ -7,6 +7,10 @@ let onboardingStep = 0;
 let onboardingObsExpanded = false;
 let logFilter = 'all';
 let logQuery = '';
+let widgetFilter = 'all';
+let widgetQuery = '';
+let widgetSort = 'favorite';
+let selectedWidgetIds = new Set();
 let selectedSceneName = null;
 let selectedSceneItemId = null;
 let scenePreview = null;
@@ -241,10 +245,10 @@ function servicesPanel() {
 }
 
 function widgetsPage() {
-  const libraryWidgets = [...snapshot.widgets].sort((a, b) => Number(Boolean(b.favorite)) - Number(Boolean(a.favorite)) || a.name.localeCompare(b.name, 'ru'));
+  const libraryWidgets = [...snapshot.widgets].sort((a, b) => widgetSort === 'name' ? a.name.localeCompare(b.name, 'ru') : widgetSort === 'status' ? a.state.localeCompare(b.state) || a.name.localeCompare(b.name, 'ru') : Number(Boolean(b.favorite)) - Number(Boolean(a.favorite)) || a.name.localeCompare(b.name, 'ru'));
   if (!snapshot.widgets.length) return `<section class="empty-library"><div class="empty-library-art"><span>${icon('widgets',38)}</span><i></i><i></i></div><span class="section-label">${snapshot.workspace?.ready ? 'ПУСТАЯ БИБЛИОТЕКА' : 'РАБОЧЕЕ ПРОСТРАНСТВО НЕ ВЫБРАНО'}</span><h2>${snapshot.workspace?.ready ? 'Здесь появятся ваши виджеты' : 'Создайте место для будущих виджетов'}</h2><p>${snapshot.workspace?.ready ? `Пространство «${esc(snapshot.workspace.name || 'Мои OBS-виджеты')}» готово. Можно создать новый виджет или импортировать существующий.` : 'Control Center может самостоятельно создать корректную структуру. Вы также можете подключить существующую папку или продолжить работу только с OBS.'}</p><div class="empty-library-actions">${snapshot.workspace?.mode === 'workspace' ? `<button class="button button--primary" data-starter-widget>${icon('spark')}Создать шаблон</button><button class="button" data-import-widget-folder>${icon('folder')}Импортировать папку</button><button class="button" data-import-widget-zip>${icon('copy')}Импортировать ZIP</button><button class="button" data-open-workspace>${icon('external')}Открыть Workspace</button>` : `<button class="button button--primary" data-workspace-create="default">${icon('spark')}Создать автоматически</button><button class="button" data-workspace-create="custom">${icon('folder')}Выбрать расположение</button><button class="button" data-workspace-select>${icon('link')}Подключить существующее</button>`}</div>${snapshot.workspace?.ready ? `<div class="workspace-path-line">${icon('folder')}<span>${esc(snapshot.workspace.path)}</span><b>${snapshot.workspace.mode === 'legacy' ? 'Совместимость' : 'Готово'}</b></div>` : ''}${recentWorkspaces()}</section>`;
-  return `${snapshot.workspace?.mode === 'legacy' ? `<section class="migration-banner">${icon('shield',25)}<div><b>Папка работает в режиме совместимости</b><span>Её можно безопасно обновить до нового формата. Перед изменением приложение сохранит резервную копию.</span></div><button class="button" data-workspace-migrate>Обновить структуру</button></section>` : ''}${workspaceManagerBar()}<section class="library-intro"><div><span class="section-label">ВАША КОЛЛЕКЦИЯ</span><h2>${snapshot.widgets.length} виджетов для эфира</h2><p>Откройте карточку, чтобы увидеть живое превью, готовый URL, размеры и состояние зависимостей.</p></div><div class="library-legend"><span><i class="legend-ready"></i>Готов к OBS</span><span><i class="legend-warning"></i>Нужна настройка</span></div></section><div class="section-tools"><div class="search-box">${icon('search')}<input id="widget-search" type="search" placeholder="Название или категория…" autocomplete="off"></div><div class="filter-pills"><button class="is-active" data-filter="all">Все · ${snapshot.widgets.length}</button><button data-filter="favorites">Избранные · ${snapshot.widgets.filter(item => item.favorite).length}</button><button data-filter="ready">Готовы · ${snapshot.widgets.filter(item => item.state === 'ready').length}</button><button data-filter="attention">Проверить · ${snapshot.widgets.filter(item => item.state !== 'ready').length}</button></div></div>
-  <div class="widget-grid">${libraryWidgets.map(widgetCard).join('')}</div>`;
+  return `${snapshot.workspace?.mode === 'legacy' ? `<section class="migration-banner">${icon('shield',25)}<div><b>Папка работает в режиме совместимости</b><span>Её можно безопасно обновить до нового формата. Перед изменением приложение сохранит резервную копию.</span></div><button class="button" data-workspace-migrate>Обновить структуру</button></section>` : ''}${workspaceManagerBar()}<section class="library-intro"><div><span class="section-label">ВАША КОЛЛЕКЦИЯ</span><h2>${snapshot.widgets.length} виджетов для эфира</h2><p>Откройте карточку, чтобы увидеть живое превью, готовый URL, размеры и состояние зависимостей.</p></div><div class="library-legend"><span><i class="legend-ready"></i>Готов к OBS</span><span><i class="legend-warning"></i>Нужна настройка</span></div></section><div class="section-tools"><div class="search-box">${icon('search')}<input id="widget-search" type="search" value="${esc(widgetQuery)}" placeholder="Название или категория…" autocomplete="off"></div><div class="filter-pills"><button class="${widgetFilter === 'all' ? 'is-active' : ''}" data-filter="all">Все · ${snapshot.widgets.length}</button><button class="${widgetFilter === 'favorites' ? 'is-active' : ''}" data-filter="favorites">Избранные · ${snapshot.widgets.filter(item => item.favorite).length}</button><button class="${widgetFilter === 'ready' ? 'is-active' : ''}" data-filter="ready">Готовы · ${snapshot.widgets.filter(item => item.state === 'ready').length}</button><button class="${widgetFilter === 'attention' ? 'is-active' : ''}" data-filter="attention">Проверить · ${snapshot.widgets.filter(item => item.state !== 'ready').length}</button></div><label class="widget-sort">Сортировка<select data-widget-sort><option value="favorite" ${widgetSort === 'favorite' ? 'selected' : ''}>Избранные первыми</option><option value="name" ${widgetSort === 'name' ? 'selected' : ''}>По названию</option><option value="status" ${widgetSort === 'status' ? 'selected' : ''}>По состоянию</option></select></label></div>
+  <section class="widget-bulk-bar ${selectedWidgetIds.size ? 'is-active' : ''}"><label><input type="checkbox" data-widget-select-all><span>Выбрать все видимые</span></label><strong>${pluralRu(selectedWidgetIds.size, 'выбран', 'выбрано', 'выбрано')}</strong><div><button data-widget-bulk="favorite" ${selectedWidgetIds.size ? '' : 'disabled'}>★ В избранное</button><button data-widget-bulk="enable" ${selectedWidgetIds.size ? '' : 'disabled'}>Включить</button><button data-widget-bulk="disable" ${selectedWidgetIds.size ? '' : 'disabled'}>Отключить</button><button data-widget-bulk="copy" ${selectedWidgetIds.size ? '' : 'disabled'}>${icon('copy')}URL</button></div></section><div class="widget-grid">${libraryWidgets.map(widgetCard).join('')}</div>`;
 }
 
 function workspaceManagerBar() {
@@ -285,13 +289,13 @@ function widgetCard(item) {
   const healthy = item.health.filter(check => check.ok).length;
   const visual = widgetVisuals[item.id];
   const failures = item.health.length - healthy;
-  return `<article class="widget-card" data-widget-card="${item.id}">${widgetArt(item)}<div class="widget-card-content"><div class="widget-card-top"><span class="category-label">${esc(item.category)}</span>${badge(item.state)}</div><div class="widget-card-body"><h3>${esc(item.name)}</h3><p>${esc(visual?.description || 'Виджет для вашей трансляции.')}</p></div><div class="widget-card-health"><span class="${item.telemetry ? 'is-live' : ''}">${icon('pulse')}<b>${item.telemetry ? `${item.telemetry.fps} FPS` : 'Нет телеметрии'}</b><small>${item.telemetry ? 'сигнал получен' : 'откройте превью'}</small></span><span class="${failures ? 'has-warning' : 'is-ready'}">${icon(failures ? 'warning' : 'check')}<b>${item.health.length ? failures ? `${failures} проблемы` : 'Проверки пройдены' : 'Автономный'}</b><small>${item.health.length ? `${healthy}/${item.health.length} зависимостей` : 'не требует сервисов'}</small></span></div><div class="widget-specs"><span>${item.width}×${item.height}</span><span>${item.fps} FPS</span><span>Browser Source</span></div><div class="widget-card-actions"><button title="Копировать URL" data-copy="${item.url}">${icon('copy')}URL</button><button class="widget-open" data-widget="${item.id}"><span>Подробнее</span>${icon('arrow')}</button></div></div></article>`;
+  return `<article class="widget-card ${selectedWidgetIds.has(item.id) ? 'is-selected' : ''}" data-widget-card="${item.id}">${widgetArt(item)}<div class="widget-card-content"><div class="widget-card-top"><label class="widget-select" title="Выбрать виджет"><input type="checkbox" data-widget-select="${item.id}" ${selectedWidgetIds.has(item.id) ? 'checked' : ''}><span></span></label><span class="category-label">${esc(item.category)}</span>${badge(item.state)}<button class="widget-favorite-button ${item.favorite ? 'is-active' : ''}" data-widget-favorite="${item.id}" title="${item.favorite ? 'Убрать из избранного' : 'Добавить в избранное'}" aria-label="${item.favorite ? 'Убрать из избранного' : 'Добавить в избранное'}">${item.favorite ? '★' : '☆'}</button></div><div class="widget-card-body"><h3>${esc(item.name)}</h3><p>${esc(visual?.description || 'Виджет для вашей трансляции.')}</p></div><div class="widget-card-health"><span class="${item.telemetry ? 'is-live' : ''}">${icon('pulse')}<b>${item.telemetry ? `${item.telemetry.fps} FPS` : 'Нет телеметрии'}</b><small>${item.telemetry ? 'сигнал получен' : 'откройте превью'}</small></span><span class="${failures ? 'has-warning' : 'is-ready'}">${icon(failures ? 'warning' : 'check')}<b>${item.health.length ? failures ? `${failures} проблемы` : 'Проверки пройдены' : 'Автономный'}</b><small>${item.health.length ? `${healthy}/${item.health.length} зависимостей` : 'не требует сервисов'}</small></span></div><div class="widget-specs"><span>${item.width}×${item.height}</span><span>${item.fps} FPS</span><span>Browser Source</span></div><div class="widget-card-actions"><button title="Копировать URL" data-copy="${item.url}">${icon('copy')}URL</button><button class="widget-open" data-widget="${item.id}"><span>Подробнее</span>${icon('arrow')}</button></div></div></article>`;
 }
 
 function widgetPage(item) {
   if (!item) return `<div class="empty-panel"><h2>Виджет не найден</h2><button class="button" data-back>${icon('back')}Назад</button></div>`;
   const visual = widgetVisuals[item.id];
-  return `<div class="detail-page"><button class="back-link" data-back>${icon('back')}Библиотека виджетов</button><section class="detail-hero detail-hero--visual">${widgetArt(item, true)}<div class="detail-copy"><div class="detail-status">${badge(item.state)}<span>${esc(item.category)}</span></div><h2>${esc(item.name)}</h2><p>${esc(visual?.description || 'Виджет для вашей трансляции.')}</p><div class="detail-chips"><span>${item.width} × ${item.height}</span><span>${item.fps} FPS</span><span>Browser Source</span></div></div><div class="detail-actions"><button class="button" data-open="${item.url}">${icon('external')}Открыть превью</button><button class="button button--primary" data-widget-tab="connect">${icon('link')}Подключить к OBS</button></div></section>
+  return `<div class="detail-page"><button class="back-link" data-back>${icon('back')}Библиотека виджетов</button><section class="detail-hero detail-hero--visual">${widgetArt(item, true)}<div class="detail-copy"><div class="detail-status">${badge(item.state)}<span>${esc(item.category)}</span></div><h2>${esc(item.name)}</h2><p>${esc(visual?.description || 'Виджет для вашей трансляции.')}</p><div class="detail-chips"><span>${item.width} × ${item.height}</span><span>${item.fps} FPS</span><span>Browser Source</span></div></div><div class="detail-actions"><button class="button widget-detail-favorite ${item.favorite ? 'is-active' : ''}" data-widget-favorite="${item.id}">${item.favorite ? '★ В избранном' : '☆ В избранное'}</button><button class="button" data-open="${item.url}">${icon('external')}Открыть превью</button><button class="button button--primary" data-widget-tab="connect">${icon('link')}Подключить к OBS</button></div></section>
     <nav class="detail-tabs">${detailTab('overview', 'Обзор')}${detailTab('connect', 'Подключение')}${detailTab('monitoring', 'Метрики')}${detailTab('activity', 'События')}${snapshot.workspace?.mode === 'workspace' ? detailTab('settings', 'Настройки') : ''}</nav>${widgetTab(item)}</div>`;
 }
 
@@ -570,29 +574,28 @@ function bindActions() {
   root.querySelector('[data-check-updates]')?.addEventListener('click', async button => { button.disabled = true; try { await window.controlCenter.checkForUpdates(); snapshot = await window.controlCenter.snapshot(); render(); } catch (error) { snapshot = await window.controlCenter.snapshot(); render(); showNotice(error.message || 'Не удалось проверить обновления', 'error'); } });
   root.querySelector('[data-download-update]')?.addEventListener('click', async button => { button.disabled = true; try { await window.controlCenter.downloadUpdate(); } catch (error) { snapshot = await window.controlCenter.snapshot(); render(); showNotice(error.message || 'Не удалось загрузить обновление', 'error'); } });
   root.querySelector('[data-install-update]')?.addEventListener('click', async button => { button.disabled = true; try { await window.controlCenter.installUpdate(); } catch (error) { button.disabled = false; showNotice(error.message || 'Не удалось установить обновление', 'error'); } });
-  if (route.section === 'widgets' && !route.widgetId) {
-    root.querySelectorAll('[data-widget-card]').forEach(card => {
-      const item = getWidget(card.dataset.widgetCard);
-      if (!item || card.querySelector('[data-widget-favorite]')) return;
-      const button = document.createElement('button');
-      button.className = `widget-favorite-button${item.favorite ? ' is-active' : ''}`;
-      button.dataset.widgetFavorite = item.id;
-      button.type = 'button';
-      button.title = item.favorite ? 'Убрать из избранного' : 'Добавить в избранное';
-      button.setAttribute('aria-label', button.title);
-      button.textContent = item.favorite ? '★' : '☆';
-      card.querySelector('.widget-card-top')?.append(button);
-    });
-    root.querySelectorAll('[data-widget-favorite]').forEach(button => button.addEventListener('click', async event => {
-      event.stopPropagation();
-      button.disabled = true;
-      const item = getWidget(button.dataset.widgetFavorite);
-      try { snapshot = await window.controlCenter.updateWidget(item.id, { favorite: !item.favorite }); render(); showNotice(item.favorite ? 'Виджет убран из избранного' : 'Виджет добавлен в избранное'); }
-      catch (error) { button.disabled = false; showNotice(error.message || 'Не удалось изменить избранное', 'error'); }
-    }));
-  }
-  root.querySelector('#widget-search')?.addEventListener('input', event => { const query = event.target.value.trim().toLowerCase(); root.querySelectorAll('[data-widget-card]').forEach(card => { const item = getWidget(card.dataset.widgetCard); card.hidden = !item.name.toLowerCase().includes(query) && !item.category.toLowerCase().includes(query); }); });
-  root.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => { root.querySelectorAll('[data-filter]').forEach(item => item.classList.toggle('is-active', item === button)); root.querySelectorAll('[data-widget-card]').forEach(card => { const item = getWidget(card.dataset.widgetCard); card.hidden = button.dataset.filter === 'favorites' ? !item.favorite : button.dataset.filter === 'ready' ? item.state !== 'ready' : button.dataset.filter === 'attention' ? item.state === 'ready' : false; }); }));
+  root.querySelectorAll('[data-widget-favorite]').forEach(button => button.addEventListener('click', async event => {
+    event.stopPropagation(); button.disabled = true;
+    const item = getWidget(button.dataset.widgetFavorite);
+    try { snapshot = await window.controlCenter.updateWidget(item.id, { favorite: !item.favorite }); render(); showNotice(item.favorite ? 'Виджет убран из избранного' : 'Виджет добавлен в избранное'); }
+    catch (error) { button.disabled = false; showNotice(error.message || 'Не удалось изменить избранное', 'error'); }
+  }));
+  root.querySelector('#widget-search')?.addEventListener('input', event => { widgetQuery = event.target.value; applyWidgetLibraryView(); });
+  root.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => { widgetFilter = button.dataset.filter; root.querySelectorAll('[data-filter]').forEach(item => item.classList.toggle('is-active', item === button)); applyWidgetLibraryView(); }));
+  root.querySelector('[data-widget-sort]')?.addEventListener('change', event => { widgetSort = event.target.value; render(); });
+  root.querySelectorAll('[data-widget-select]').forEach(input => input.addEventListener('change', () => { if (input.checked) selectedWidgetIds.add(input.dataset.widgetSelect); else selectedWidgetIds.delete(input.dataset.widgetSelect); render(); }));
+  root.querySelector('[data-widget-select-all]')?.addEventListener('change', event => { root.querySelectorAll('[data-widget-card]:not([hidden])').forEach(card => { if (event.target.checked) selectedWidgetIds.add(card.dataset.widgetCard); else selectedWidgetIds.delete(card.dataset.widgetCard); }); render(); });
+  root.querySelectorAll('[data-widget-bulk]').forEach(button => button.addEventListener('click', async () => {
+    const ids = [...selectedWidgetIds].filter(id => getWidget(id)); if (!ids.length) return;
+    button.disabled = true;
+    try {
+      if (button.dataset.widgetBulk === 'copy') { await navigator.clipboard.writeText(ids.map(id => getWidget(id).url).join('\n')); showNotice('URL выбранных виджетов скопированы'); return; }
+      const changes = button.dataset.widgetBulk === 'favorite' ? { favorite: true } : { disabled: button.dataset.widgetBulk === 'disable' };
+      for (const id of ids) snapshot = await window.controlCenter.updateWidget(id, changes);
+      selectedWidgetIds.clear(); render(); showNotice(`Обновлено: ${ids.length}`);
+    } catch (error) { button.disabled = false; showNotice(error.message || 'Групповое действие не выполнено', 'error'); }
+  }));
+  applyWidgetLibraryView();
   if (route.section === 'logs') {
     const heading = root.querySelector('.log-stream-head');
     if (heading && !heading.querySelector('[data-log-search]')) {
@@ -611,6 +614,20 @@ function bindActions() {
   root.querySelectorAll('[data-log-filter]').forEach(button => button.addEventListener('click', () => { logFilter = button.dataset.logFilter; render(); }));
   root.querySelector('#help-search')?.addEventListener('input', event => { const query = event.target.value.trim().toLowerCase(); root.querySelectorAll('[data-help-topic]').forEach(card => { card.hidden = query && !card.textContent.toLowerCase().includes(query); }); });
   if (route.section === 'scenes' && snapshot.obs.connected && (!scenePreview || scenePreview.sceneName !== selectedSceneName)) setTimeout(() => loadScenePreview(false), 0);
+}
+
+function applyWidgetLibraryView() {
+  if (route.section !== 'widgets' || route.widgetId) return;
+  const query = widgetQuery.trim().toLowerCase();
+  root.querySelectorAll('[data-widget-card]').forEach(card => {
+    const item = getWidget(card.dataset.widgetCard);
+    const matchesQuery = !query || item.name.toLowerCase().includes(query) || item.category.toLowerCase().includes(query);
+    const matchesFilter = widgetFilter === 'favorites' ? item.favorite : widgetFilter === 'ready' ? item.state === 'ready' : widgetFilter === 'attention' ? item.state !== 'ready' : true;
+    card.hidden = !matchesQuery || !matchesFilter;
+  });
+  const visible = [...root.querySelectorAll('[data-widget-card]:not([hidden])')];
+  const selectAll = root.querySelector('[data-widget-select-all]');
+  if (selectAll) selectAll.checked = visible.length > 0 && visible.every(card => selectedWidgetIds.has(card.dataset.widgetCard));
 }
 
 function bindSceneDragging() {
