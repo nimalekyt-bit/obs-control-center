@@ -7,6 +7,8 @@ const MANIFEST_NAME = 'occ-workspace.json';
 const SCHEMA_VERSION = 1;
 const DIRECTORIES = ['widgets', 'data', 'logs', 'cache', 'backups'];
 const MAX_IMPORT_BYTES = 100 * 1024 * 1024;
+const MAX_IMPORT_FILES = 5000;
+const MAX_IMPORT_ARCHIVE_BYTES = 120 * 1024 * 1024;
 
 function legacyWorkspace(candidate) {
   return Boolean(candidate && fs.existsSync(path.join(candidate, 'widgets.config.json')));
@@ -136,10 +138,14 @@ async function writeManifest(current, manifest, reason, skipBackup = false) {
 
 async function scanImportDirectory(root) {
   let bytes = 0;
+  let files = 0;
+  const rootStat = await fsp.lstat(root);
+  if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) throw new Error('Импорт допускает только обычную папку.');
   async function visit(directory) {
     for (const entry of await fsp.readdir(directory, { withFileTypes: true })) {
       const full = path.join(directory, entry.name);
       if (entry.isSymbolicLink()) throw new Error('Импорт не поддерживает символические ссылки.');
+      if (entry.isFile()) { files += 1; if (files > MAX_IMPORT_FILES) throw new Error('В виджете слишком много файлов.'); }
       if (entry.isDirectory()) await visit(full);
       else if (entry.isFile()) { bytes += (await fsp.stat(full)).size; if (bytes > MAX_IMPORT_BYTES) throw new Error('Размер виджета превышает 100 МБ.'); }
     }
@@ -176,11 +182,15 @@ async function importWidgetFolder(root, source) {
 }
 
 async function importWidgetZip(root, zipPath) {
+  const archiveStat = await fsp.stat(zipPath);
+  if (!archiveStat.isFile() || archiveStat.size > MAX_IMPORT_ARCHIVE_BYTES) throw new Error('Размер ZIP-архива превышает допустимый лимит.');
   const zip = new AdmZip(zipPath);
   const entries = zip.getEntries();
   let bytes = 0;
+  if (entries.length > MAX_IMPORT_FILES) throw new Error('В ZIP-архиве слишком много файлов.');
   for (const entry of entries) {
     const normalized = entry.entryName.replace(/\\/g, '/');
+    if (Number(entry.header?.size || 0) > MAX_IMPORT_BYTES) throw new Error('Один файл в ZIP-архиве слишком большой.');
     if (normalized.startsWith('/') || normalized.includes(':') || normalized.split('/').includes('..')) throw new Error('Архив содержит небезопасные пути.');
     bytes += Number(entry.header?.size || 0);
     if (bytes > MAX_IMPORT_BYTES) throw new Error('Размер распакованных файлов превышает 100 МБ.');

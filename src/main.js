@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, shell, dialog, session } = require('electron');
+const { isAllowedExternalUrl } = require('./url-policy');
 const { spawn, execFile } = require('child_process');
 const fs = require('fs');
 const fsp = require('fs/promises');
@@ -844,7 +845,9 @@ ipcMain.handle('diagnostic-report', createDiagnosticReport);
 ipcMain.handle('open-help', (_, key) => shell.openExternal(resolveHelpUrl(key)));
 ipcMain.handle('open-url', (_, value) => {
   const url = new URL(String(value));
-  if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Разрешены только безопасные HTTP-ссылки.');
+  if (!isAllowedExternalUrl(url, { localPort: widgetServerPort || config.server.port })) {
+    throw new Error('Ссылка не входит в список разрешённых адресов.');
+  }
   return shell.openExternal(url.toString());
 });
 ipcMain.handle('renderer-error', (_, value = {}) => {
