@@ -511,6 +511,15 @@ function bindActions() {
   root.querySelectorAll('[data-profile]').forEach(button => button.addEventListener('click', async () => { button.disabled = true; try { snapshot = await window.controlCenter.runProfile(button.dataset.profile); showNotice(snapshot.services.length ? 'Профиль стрима запущен' : 'Для этого пространства сервисы не требуются'); } catch (error) { showNotice(error.message || 'Не удалось запустить сервисы', 'error'); } }));
   root.querySelectorAll('[data-action="checks"]').forEach(button => button.addEventListener('click', async () => { button.disabled = true; snapshot = await window.controlCenter.runChecks(); showNotice('Проверка завершена'); }));
   root.querySelector('[data-action="refresh"]')?.addEventListener('click', () => refresh(true));
+  root.querySelectorAll('.issue-action').forEach(action => {
+    if (action.querySelector('[data-diagnostic-help]')) return;
+    const button = document.createElement('button');
+    button.className = 'button';
+    button.dataset.help = 'telemetry';
+    button.dataset.diagnosticHelp = 'true';
+    button.innerHTML = `${icon('book')}Справка по проверке`;
+    action.appendChild(button);
+  });
   root.querySelectorAll('[data-help]').forEach(button => button.addEventListener('click', async () => {
     button.disabled = true;
     try { await window.controlCenter.openHelp(button.dataset.help); } catch (error) { showNotice(error.message || 'Не удалось открыть справку', 'error'); }
