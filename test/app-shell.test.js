@@ -140,6 +140,26 @@ test('first run supports an empty workspace or no workspace at all', () => {
   assert.doesNotMatch(main, /candidate.*'music'.*widgets\.config\.json/);
 });
 
+test('widget library supports persistent favorites, sorting and safe bulk actions', () => {
+  const workspace = read('src/workspace.js');
+  const renderer = read('src/renderer/app.js');
+  assert.match(workspace, /favorite: Boolean\(widget\.favorite\)/);
+  assert.match(workspace, /favorite: changes\.favorite/);
+  assert.match(renderer, /data-widget-bulk/);
+  assert.match(renderer, /data-widget-sort/);
+  assert.match(renderer, /data-widget-select/);
+  assert.match(renderer, /window\.controlCenter\.updateWidget/);
+});
+
+test('diagnostic checks expose a timestamp and actionable reason', () => {
+  const main = read('src/main.js');
+  const renderer = read('src/renderer/app.js');
+  assert.match(main, /checkedAt/);
+  assert.match(main, /reason:/);
+  assert.match(renderer, /check\.reason/);
+  assert.match(renderer, /check\.checkedAt/);
+});
+
 test('workspace manager exposes safe widget lifecycle actions', () => {
   const main = read('src/main.js');
   const preload = read('src/preload.js');

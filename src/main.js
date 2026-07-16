@@ -300,16 +300,21 @@ function checkPort(port) {
 }
 
 async function checkHealth(rule) {
-  if (rule.type === 'port') return { ...rule, ok: await checkPort(rule.port) };
+  const checkedAt = new Date().toISOString();
+  if (rule.type === 'port') {
+    const ok = await checkPort(rule.port);
+    return { ...rule, ok, checkedAt, reason: ok ? 'Порт отвечает' : `Порт ${rule.port} не отвечает` };
+  }
   if (rule.type === 'file') {
-    if (!workspaceRoot) return { ...rule, ok: false, ageMs: null };
+    if (!workspaceRoot) return { ...rule, ok: false, ageMs: null, checkedAt, reason: 'Рабочая папка не выбрана' };
     try {
       const stat = await fsp.stat(path.join(workspaceRoot, rule.path));
       const ageMs = Date.now() - stat.mtimeMs;
-      return { ...rule, ageMs, ok: ageMs <= rule.maxAgeMs };
-    } catch { return { ...rule, ok: false, ageMs: null }; }
+      const ok = ageMs <= rule.maxAgeMs;
+      return { ...rule, ageMs, ok, checkedAt, reason: ok ? 'Файл обновляется вовремя' : `Файл не обновлялся ${Math.round(ageMs / 60000)} мин.` };
+    } catch { return { ...rule, ok: false, ageMs: null, checkedAt, reason: `Файл не найден: ${rule.path}` }; }
   }
-  return { ...rule, ok: false };
+  return { ...rule, ok: false, checkedAt, reason: 'Тип проверки не поддерживается' };
 }
 
 async function widgetSnapshot(widget) {
