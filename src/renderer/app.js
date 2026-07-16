@@ -23,7 +23,7 @@ const timeAgo = ms => ms == null ? 'нет данных' : ms < 1000 ? 'толь
 const pluralRu = (value, one, few, many) => { const number = Math.abs(Number(value)); const form = number % 10 === 1 && number % 100 !== 11 ? one : [2,3,4].includes(number % 10) && ![12,13,14].includes(number % 100) ? few : many; return `${value} ${form}`; };
 const getWidget = id => snapshot.widgets.find(item => item.id === id);
 const appIconUrl = window.location.protocol === 'file:' ? '../../assets/icon.png' : '/assets/icon.png';
-const appVersion = '0.13.2';
+const appVersion = '0.13.3';
 
 const iconPaths = {
   home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M9 20v-6h6v6"/>',
