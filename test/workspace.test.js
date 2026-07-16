@@ -103,6 +103,20 @@ test('ZIP import rejects traversal and imports a valid widget archive', async t 
   assert.ok(fs.existsSync(path.join(root, 'widgets', 'zip-widget', 'index.html')));
 });
 
+test('widget favorites persist in the workspace manifest', async t => {
+  const root = await fsp.mkdtemp(path.join(os.tmpdir(), 'occ-favorite-'));
+  t.after(() => fsp.rm(root, { recursive: true, force: true }));
+  await createWorkspace(root);
+  const created = await createStarterWidget(root);
+  assert.equal(Boolean(inspectWorkspaceSync(root).manifest.widgets[0].favorite), false);
+  const added = await updateWidget(root, created.widget.id, { favorite: true });
+  assert.equal(added.widget.favorite, true);
+  assert.equal(inspectWorkspaceSync(root).manifest.widgets[0].favorite, true);
+  const removed = await updateWidget(root, created.widget.id, { favorite: false });
+  assert.equal(removed.widget.favorite, false);
+  assert.equal(inspectWorkspaceSync(root).manifest.widgets[0].favorite, false);
+});
+
 test('ZIP import rejects excessive file counts before extraction', async t => {
   const root = await fsp.mkdtemp(path.join(os.tmpdir(), 'occ-zip-limit-'));
   const archive = path.join(os.tmpdir(), `occ-widget-many-${Date.now()}.zip`);
