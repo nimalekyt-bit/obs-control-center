@@ -10,6 +10,7 @@ const { autoUpdater } = require('electron-updater');
 const { placementTransform } = require('./obs-layout');
 const { TelemetryStore } = require('./telemetry-store');
 const { restartDecision } = require('./service-recovery');
+const { resolveHelpUrl } = require('./help-routes');
 const { createStarterWidget, createWorkspace, importWidgetFolder, importWidgetZip, inspectWorkspaceSync, listWorkspaceBackups, migrateLegacyWorkspace, removeWidget, restoreWorkspaceBackup, updateWidget, MANIFEST_NAME } = require('./workspace');
 
 const controlRoot = path.resolve(__dirname, '..');
@@ -840,6 +841,7 @@ ipcMain.handle('reset-onboarding', async () => {
   return getSnapshot();
 });
 ipcMain.handle('diagnostic-report', createDiagnosticReport);
+ipcMain.handle('open-help', (_, key) => shell.openExternal(resolveHelpUrl(key)));
 ipcMain.handle('open-url', (_, value) => {
   const url = new URL(String(value));
   if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Разрешены только безопасные HTTP-ссылки.');

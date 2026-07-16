@@ -109,7 +109,7 @@ function onboardingWizard() {
   return `${windowTitlebar()}<div class="welcome-shell"><div class="welcome-aurora"></div><div class="welcome-grid"></div><section class="welcome-window">
     <aside class="welcome-aside"><div class="welcome-brand"><img src="${appIconUrl}" alt=""><div><b>OBS Control Center</b><span>Персональная студия виджетов</span></div></div>
       <div class="welcome-steps">${steps.map((label, index) => `<div class="welcome-step ${index === onboardingStep ? 'is-active' : ''} ${index < onboardingStep ? 'is-done' : ''}"><i>${index < onboardingStep ? icon('check', 13) : index + 1}</i><div><b>${label}</b><span>${['Что умеет приложение','Где находятся файлы','Безопасная интеграция','Последняя проверка'][index]}</span></div></div>`).join('')}</div>
-      <div class="welcome-local">${icon('shield')}<div><b>Без аккаунта и облака</b><span>Все данные остаются на этом компьютере.</span></div></div>
+      <div class="welcome-local">${icon('shield')}<div><b>Без аккаунта и облака</b><span>Все данные остаются на этом компьютере.</span></div></div><button class="text-button welcome-help-link" data-help="${['firstRun', 'workspace', 'obs', 'firstRun'][onboardingStep] || 'firstRun'}">Открыть справку первого запуска${icon('external', 14)}</button>
     </aside><main class="welcome-content">${onboardingContent()}</main>
   </section></div>`;
 }
@@ -159,9 +159,13 @@ function topbar() {
   const overallReady = snapshot.workspace?.ready && snapshot.widgets.length > 0 && snapshot.widgets.every(item => item.state === 'ready') && snapshot.services.every(item => ['ready', 'external'].includes(item.state));
   return `<header class="topbar"><div><p class="breadcrumbs">WORKSPACE <span>/</span> ${esc(title).toUpperCase()}</p><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div><div class="topbar-actions">
     <span class="readiness ${overallReady ? 'readiness--ready' : ''}"><i></i>${overallReady ? 'Система готова' : 'Есть замечания'}</span>
-    <button class="icon-button" data-action="refresh" title="Обновить данные">${icon('refresh')}</button>
+    <button class="icon-button" data-action="refresh" title="Обновить данные">${icon('refresh')}</button><button class="button button--context-help" data-help="${sectionHelpKey(route.section)}">${icon('book', 16)}Справка раздела</button>
     ${!snapshot.workspace?.ready ? `<button class="button button--primary" data-workspace-select>${icon('folder')}Подключить папку</button>` : snapshot.services.length ? `<button class="button button--primary" data-profile="stream">${icon('play')}Запустить сервисы</button>` : `<button class="button button--primary" data-nav="widgets">${icon('widgets')}Добавить виджет</button>`}
   </div></header>`;
+}
+
+function sectionHelpKey(section) {
+  return ({ overview: 'firstRun', scenes: 'scenes', widgets: 'widgets', obs: 'obs', diagnostics: 'telemetry', help: 'firstRun', logs: 'firstRun', about: 'firstRun' })[section] || 'firstRun';
 }
 
 function page() {
@@ -505,6 +509,11 @@ function bindActions() {
   root.querySelectorAll('[data-profile]').forEach(button => button.addEventListener('click', async () => { button.disabled = true; try { snapshot = await window.controlCenter.runProfile(button.dataset.profile); showNotice(snapshot.services.length ? 'Профиль стрима запущен' : 'Для этого пространства сервисы не требуются'); } catch (error) { showNotice(error.message || 'Не удалось запустить сервисы', 'error'); } }));
   root.querySelectorAll('[data-action="checks"]').forEach(button => button.addEventListener('click', async () => { button.disabled = true; snapshot = await window.controlCenter.runChecks(); showNotice('Проверка завершена'); }));
   root.querySelector('[data-action="refresh"]')?.addEventListener('click', () => refresh(true));
+  root.querySelectorAll('[data-help]').forEach(button => button.addEventListener('click', async () => {
+    button.disabled = true;
+    try { await window.controlCenter.openHelp(button.dataset.help); } catch (error) { showNotice(error.message || 'Не удалось открыть справку', 'error'); }
+    finally { button.disabled = false; }
+  }));
   root.querySelectorAll('[data-open]').forEach(button => button.addEventListener('click', () => window.controlCenter.openUrl(button.dataset.open)));
   root.querySelectorAll('[data-copy]').forEach(button => button.addEventListener('click', async () => { await navigator.clipboard.writeText(button.dataset.copy); showNotice('URL скопирован'); }));
   root.querySelectorAll('[data-service]').forEach(button => button.addEventListener('click', async () => { button.disabled = true; try { snapshot = await window.controlCenter.serviceAction(button.dataset.service, button.dataset.serviceAction); render(); } catch (error) { showNotice(error.message || 'Сервис не запущен', 'error'); } }));

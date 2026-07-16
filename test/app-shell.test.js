@@ -51,6 +51,19 @@ test('production UI has onboarding, help and safe diagnostic reporting', () => {
   assert.equal(JSON.parse(read('package.json')).version, '0.13.0');
 });
 
+test('contextual documentation links use the dedicated safe IPC channel', () => {
+  const main = read('src/main.js');
+  const preload = read('src/preload.js');
+  const renderer = read('src/renderer/app.js');
+
+  assert.match(main, /require\('\.\/help-routes'\)/);
+  assert.match(main, /ipcMain\.handle\('open-help'/);
+  assert.match(preload, /openHelp: key => ipcRenderer\.invoke\('open-help', key\)/);
+  assert.match(renderer, /data-help="\$\{sectionHelpKey\(route\.section\)\}"/);
+  assert.match(renderer, /window\.controlCenter\.openHelp\(button\.dataset\.help\)/);
+  assert.match(renderer, /data-help="\$\{\['firstRun', 'workspace', 'obs', 'firstRun'\]/);
+});
+
 test('product manifest matches the package and exposes only a verifiable release', () => {
   const manifest = JSON.parse(read('product-manifest.json'));
   const packageJson = JSON.parse(read('package.json'));
