@@ -162,6 +162,20 @@ test('desktop shell blocks untrusted navigation, permissions and oversized telem
   assert.match(main, /renderer-error/);
 });
 
+test('external links use an explicit allow-list', () => {
+  const { isAllowedExternalUrl } = require('../src/url-policy');
+  const local = { localPort: 3210 };
+  assert.equal(isAllowedExternalUrl('http://127.0.0.1:3210/tools/av-sync', local), true);
+  assert.equal(isAllowedExternalUrl('https://github.com/nimalekyt-bit/obs-control-center/issues', local), true);
+  assert.equal(isAllowedExternalUrl('https://obs-control-center.pages.dev/docs/', local), true);
+  assert.equal(isAllowedExternalUrl('https://t.me/woodskilla', local), true);
+  assert.equal(isAllowedExternalUrl('https://example.com', local), false);
+  assert.equal(isAllowedExternalUrl('https://github.com.evil.example/nimalekyt-bit/obs-control-center', local), false);
+  assert.equal(isAllowedExternalUrl('https://nimalekyt-bit@github.com/nimalekyt-bit/obs-control-center', local), false);
+  assert.equal(isAllowedExternalUrl('http://127.0.0.1:9999/tools/av-sync', local), false);
+  assert.equal(isAllowedExternalUrl('file:///C:/Windows/System32/calc.exe', local), false);
+});
+
 test('diagnostics persist real telemetry and detect service runtimes', () => {
   const main = read('src/main.js');
   const renderer = read('src/renderer/app.js');
