@@ -19,7 +19,7 @@ function normalizeWidget(widget) {
   const folder = String(widget.folder || `widgets/${widget.id}`).replace(/\\/g, '/');
   const entry = String(widget.entry || 'index.html').replace(/\\/g, '/');
   if (path.isAbsolute(folder) || folder.split('/').includes('..') || entry.split('/').includes('..')) throw new Error(`Виджет «${widget.id}» содержит небезопасный путь.`);
-  return { ...widget, id: String(widget.id), name: String(widget.name || widget.id), folder, entry, width: Number(widget.width) || 1920, height: Number(widget.height) || 1080, fps: Number(widget.fps) || 30, category: String(widget.category || 'Без категории'), dependencies: Array.isArray(widget.dependencies) ? widget.dependencies : [], health: Array.isArray(widget.health) ? widget.health : [] };
+  return { ...widget, id: String(widget.id), name: String(widget.name || widget.id), folder, entry, width: Number(widget.width) || 1920, height: Number(widget.height) || 1080, fps: Number(widget.fps) || 30, category: String(widget.category || 'Без категории'), favorite: Boolean(widget.favorite), dependencies: Array.isArray(widget.dependencies) ? widget.dependencies : [], health: Array.isArray(widget.health) ? widget.health : [] };
 }
 
 function normalizeService(service) {
@@ -218,7 +218,7 @@ async function updateWidget(root, id, changes) {
   const index = current.manifest.widgets.findIndex(widget => widget.id === id);
   if (index < 0) throw new Error('Виджет не найден.');
   const original = current.manifest.widgets[index];
-  const updated = normalizeWidget({ ...original, name: changes.name ?? original.name, category: changes.category ?? original.category, width: changes.width ?? original.width, height: changes.height ?? original.height, fps: changes.fps ?? original.fps, disabled: changes.disabled ?? original.disabled });
+  const updated = normalizeWidget({ ...original, name: changes.name ?? original.name, category: changes.category ?? original.category, width: changes.width ?? original.width, height: changes.height ?? original.height, fps: changes.fps ?? original.fps, disabled: changes.disabled ?? original.disabled, favorite: changes.favorite ?? original.favorite });
   const widgets = [...current.manifest.widgets]; widgets[index] = updated;
   return { workspace: await writeManifest(current, { ...current.manifest, widgets }, `before-edit-${id}`), widget: updated };
 }
