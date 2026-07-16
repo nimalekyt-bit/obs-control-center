@@ -48,7 +48,7 @@ test('production UI has onboarding, help and safe diagnostic reporting', () => {
   assert.match(report, /\[Домашняя папка\]/);
   assert.match(report, /Перед отправкой: просмотрите текст/);
   assert.doesNotMatch(report, /snapshot\.workspace\.path/);
-  assert.equal(JSON.parse(read('package.json')).version, '0.13.1');
+  assert.equal(JSON.parse(read('package.json')).version, '0.13.2');
 });
 
 test('contextual documentation links use the dedicated safe IPC channel', () => {
