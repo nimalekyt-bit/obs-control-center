@@ -184,6 +184,8 @@ test('diagnostics persist real telemetry and detect service runtimes', () => {
   assert.match(main, /requiredRuntime/);
   assert.match(renderer, /function telemetryHistory/);
   assert.match(renderer, /function runtimePanel/);
+  assert.match(renderer, /data-diagnostic-help/);
+  assert.match(renderer, /dataset\.help = 'telemetry'/);
 });
 
 test('reliability layer detects unclean exits and supports interface scaling', () => {
