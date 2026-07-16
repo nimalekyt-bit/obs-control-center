@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld('controlCenter', {
   completeOnboarding: () => ipcRenderer.invoke('complete-onboarding'),
   resetOnboarding: () => ipcRenderer.invoke('reset-onboarding'),
   diagnosticReport: () => ipcRenderer.invoke('diagnostic-report'),
+  openHelp: key => ipcRenderer.invoke('open-help', key),
   openUrl: url => ipcRenderer.invoke('open-url', url)
   ,reportRendererError: value => ipcRenderer.invoke('renderer-error', value)
   ,setUiScale: value => ipcRenderer.invoke('set-ui-scale', value)

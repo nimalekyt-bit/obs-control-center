@@ -48,7 +48,20 @@ test('production UI has onboarding, help and safe diagnostic reporting', () => {
   assert.match(report, /\[Домашняя папка\]/);
   assert.match(report, /Перед отправкой: просмотрите текст/);
   assert.doesNotMatch(report, /snapshot\.workspace\.path/);
-  assert.equal(JSON.parse(read('package.json')).version, '0.13.0');
+  assert.equal(JSON.parse(read('package.json')).version, '0.13.1');
+});
+
+test('contextual documentation links use the dedicated safe IPC channel', () => {
+  const main = read('src/main.js');
+  const preload = read('src/preload.js');
+  const renderer = read('src/renderer/app.js');
+
+  assert.match(main, /require\('\.\/help-routes'\)/);
+  assert.match(main, /ipcMain\.handle\('open-help'/);
+  assert.match(preload, /openHelp: key => ipcRenderer\.invoke\('open-help', key\)/);
+  assert.match(renderer, /data-help="\$\{sectionHelpKey\(route\.section\)\}"/);
+  assert.match(renderer, /window\.controlCenter\.openHelp\(button\.dataset\.help\)/);
+  assert.match(renderer, /data-help="\$\{\['firstRun', 'workspace', 'obs', 'firstRun'\]/);
 });
 
 test('product manifest matches the package and exposes only a verifiable release', () => {
@@ -57,13 +70,17 @@ test('product manifest matches the package and exposes only a verifiable release
   assert.equal(manifest.schemaVersion, 1);
   assert.equal(manifest.version, packageJson.version);
   assert.equal(manifest.repository, 'https://github.com/nimalekyt-bit/obs-control-center');
-  assert.equal(manifest.release.published, true);
-  assert.equal(manifest.release.tag, `v${packageJson.version}`);
-  assert.equal(manifest.release.assetName, `OBS-Control-Center-Setup-${packageJson.version}.exe`);
-  assert.equal(manifest.release.pageUrl, `${manifest.repository}/releases/tag/v${packageJson.version}`);
-  assert.equal(manifest.release.downloadUrl, `${manifest.repository}/releases/download/v${packageJson.version}/${manifest.release.assetName}`);
-  assert.match(manifest.release.sha256, /^[a-f0-9]{64}$/);
-  assert.ok(manifest.release.size > 0);
+  assert.equal(typeof manifest.release.published, 'boolean');
+  if (manifest.release.published) {
+    assert.equal(manifest.release.tag, `v${packageJson.version}`);
+    assert.equal(manifest.release.assetName, `OBS-Control-Center-Setup-${packageJson.version}.exe`);
+    assert.equal(manifest.release.pageUrl, `${manifest.repository}/releases/tag/v${packageJson.version}`);
+    assert.equal(manifest.release.downloadUrl, `${manifest.repository}/releases/download/v${packageJson.version}/${manifest.release.assetName}`);
+    assert.match(manifest.release.sha256, /^[a-f0-9]{64}$/);
+    assert.ok(manifest.release.size > 0);
+  } else {
+    for (const key of ['tag', 'assetName', 'pageUrl', 'downloadUrl', 'size', 'sha256', 'publishedAt']) assert.equal(manifest.release[key], null);
+  }
   assert.equal(manifest.release.signature, 'unsigned');
   assert.ok(manifest.release.summary);
   assert.ok(manifest.release.changes.length > 0);

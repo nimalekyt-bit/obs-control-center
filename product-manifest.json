@@ -2,21 +2,21 @@
   "schemaVersion": 1,
   "product": "obs-control-center",
   "name": "OBS Control Center",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "channel": "early-access",
   "docsVersion": "0.13",
   "repository": "https://github.com/nimalekyt-bit/obs-control-center",
   "release": {
-    "published": true,
-    "tag": "v0.13.0",
-    "assetName": "OBS-Control-Center-Setup-0.13.0.exe",
-    "pageUrl": "https://github.com/nimalekyt-bit/obs-control-center/releases/tag/v0.13.0",
-    "downloadUrl": "https://github.com/nimalekyt-bit/obs-control-center/releases/download/v0.13.0/OBS-Control-Center-Setup-0.13.0.exe",
-    "size": 94324046,
-    "sha256": "bd1c771b4a5bcb93b621c1534be8c22f222f3281abf9efc1e99dc35a9a2b1a23",
-    "publishedAt": "2026-07-13T04:32:43Z",
+    "published": false,
+    "tag": null,
+    "assetName": null,
+    "pageUrl": null,
+    "downloadUrl": null,
+    "size": null,
+    "sha256": null,
+    "publishedAt": null,
     "signature": "unsigned",
-    "summary": "Безопасное восстановление сервисов",
+    "summary": "Контекстная справка и безопасные переходы",
     "changes": [
       {
         "kind": "reliability",
@@ -32,7 +32,11 @@
       },
       {
         "kind": "new",
-        "text": "Интерфейс показывает попытку восстановления и состояние ручной проверки."
+        "text": "Из каждого раздела приложения можно открыть соответствующую статью официальной документации."
+      },
+      {
+        "kind": "safety",
+        "text": "Переходы к справке используют фиксированный HTTPS-реестр и не принимают произвольные адреса."
       }
     ]
   },
@@ -45,7 +49,7 @@
     "validatedAt": null
   },
   "limitations": [
-    "Версия 0.13.0 опубликована как Early Access и ещё не считается стабильным выпуском.",
+    "Версия 0.13.1 готовится как Early Access и ещё не считается стабильным выпуском.",
     "Windows-сборка не подписана Authenticode и может вызвать предупреждение SmartScreen.",
     "Не завершены чистая установка и многопрофильная проверка с реальным OBS.",
     "Политика поддержки старых версий и миграций ещё не утверждена владельцем."
@@ -60,5 +64,5 @@
     "avTest": "/docs/av-test/",
     "backups": "/docs/backups/"
   },
-  "updatedAt": "2026-07-13"
+  "updatedAt": "2026-07-16"
 }
