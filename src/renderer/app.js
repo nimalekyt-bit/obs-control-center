@@ -6,6 +6,7 @@ let notice = null;
 let onboardingStep = 0;
 let onboardingObsExpanded = false;
 let logFilter = 'all';
+let logQuery = '';
 let selectedSceneName = null;
 let selectedSceneItemId = null;
 let scenePreview = null;
@@ -441,7 +442,8 @@ function helpStep(number, title, text, target) { return `<article class="step-ca
 function faq(question, answer) { return `<details><summary>${esc(question)}${icon('arrow', 15)}</summary><p>${esc(answer)}</p></details>`; }
 
 function logsPage() {
-  const visible = snapshot.logs.filter(entry => logFilter === 'all' || entry.level === logFilter);
+  const query = logQuery.trim().toLowerCase();
+  const visible = snapshot.logs.filter(entry => (logFilter === 'all' || entry.level === logFilter) && (!query || `${entry.source} ${entry.message}`.toLowerCase().includes(query)));
   const counts = { info: snapshot.logs.filter(e => e.level === 'info').length, warning: snapshot.logs.filter(e => e.level === 'warning').length, error: snapshot.logs.filter(e => e.level === 'error').length };
   return `<section class="logs-summary"><div><span class="section-label">ЛОКАЛЬНАЯ ИСТОРИЯ</span><h2>Всё, что происходило с приложением</h2><p>События сгруппированы по важности. Пароли и секреты сюда не записываются.</p></div><button class="button" data-diagnostic-report>${icon('copy')}Скопировать безопасный отчёт</button></section><div class="logs-layout"><aside class="log-filters"><span class="section-label">ПОКАЗАТЬ</span><button class="${logFilter === 'all' ? 'is-active' : ''}" data-log-filter="all">${icon('logs')}Все события<b>${snapshot.logs.length}</b></button><button class="${logFilter === 'error' ? 'is-active' : ''}" data-log-filter="error">${icon('warning')}Ошибки<b>${counts.error}</b></button><button class="${logFilter === 'warning' ? 'is-active' : ''}" data-log-filter="warning">${icon('warning')}Предупреждения<b>${counts.warning}</b></button><button class="${logFilter === 'info' ? 'is-active' : ''}" data-log-filter="info">${icon('check')}Информация<b>${counts.info}</b></button><div class="log-retention">${icon('clock')}<span>Хранятся последние 500 событий на этом компьютере.</span></div></aside><section class="log-stream"><div class="log-stream-head"><div><b>${logFilter === 'all' ? 'Все события' : logFilter === 'error' ? 'Ошибки' : logFilter === 'warning' ? 'Предупреждения' : 'Информация'}</b><span>${visible.length} записей</span></div><button class="icon-button" data-action="refresh" title="Обновить">${icon('refresh')}</button></div><div class="timeline">${visible.length ? visible.map(logRow).join('') : `<div class="empty-panel">${icon('check', 30)}<h3>Здесь пока пусто</h3><p>Для выбранного фильтра событий нет.</p></div>`}</div></section></div>`;
 }
@@ -560,6 +562,21 @@ function bindActions() {
   root.querySelector('[data-install-update]')?.addEventListener('click', async button => { button.disabled = true; try { await window.controlCenter.installUpdate(); } catch (error) { button.disabled = false; showNotice(error.message || 'Не удалось установить обновление', 'error'); } });
   root.querySelector('#widget-search')?.addEventListener('input', event => { const query = event.target.value.trim().toLowerCase(); root.querySelectorAll('[data-widget-card]').forEach(card => { const item = getWidget(card.dataset.widgetCard); card.hidden = !item.name.toLowerCase().includes(query) && !item.category.toLowerCase().includes(query); }); });
   root.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => { root.querySelectorAll('[data-filter]').forEach(item => item.classList.toggle('is-active', item === button)); root.querySelectorAll('[data-widget-card]').forEach(card => { const item = getWidget(card.dataset.widgetCard); card.hidden = button.dataset.filter === 'ready' ? item.state !== 'ready' : button.dataset.filter === 'attention' ? item.state === 'ready' : false; }); }));
+  if (route.section === 'logs') {
+    const heading = root.querySelector('.log-stream-head');
+    if (heading && !heading.querySelector('[data-log-search]')) {
+      const input = document.createElement('input');
+      input.type = 'search';
+      input.className = 'log-search-input';
+      input.placeholder = 'Найти в журнале…';
+      input.value = logQuery;
+      input.dataset.logSearch = 'true';
+      input.setAttribute('aria-label', 'Поиск по журналу событий');
+      input.addEventListener('change', () => { logQuery = input.value; render(); });
+      input.addEventListener('keydown', event => { if (event.key === 'Enter') { logQuery = input.value; render(); } });
+      heading.insertBefore(input, heading.querySelector('[data-action="refresh"]'));
+    }
+  }
   root.querySelectorAll('[data-log-filter]').forEach(button => button.addEventListener('click', () => { logFilter = button.dataset.logFilter; render(); }));
   root.querySelector('#help-search')?.addEventListener('input', event => { const query = event.target.value.trim().toLowerCase(); root.querySelectorAll('[data-help-topic]').forEach(card => { card.hidden = query && !card.textContent.toLowerCase().includes(query); }); });
   if (route.section === 'scenes' && snapshot.obs.connected && (!scenePreview || scenePreview.sceneName !== selectedSceneName)) setTimeout(() => loadScenePreview(false), 0);
